@@ -2,6 +2,7 @@ export default function ({ types: t }) {
   let dataPrefix = 'data-qa';
   let classPrefix = 'className';
   let jssClassPrefix = 'classes';
+  let disableClass = false;
 
   let fileNameAttr;
   let nodeNameAttr;
@@ -18,6 +19,10 @@ export default function ({ types: t }) {
 
       if (state.opts.jssClassPrefix) {
         jssClassPrefix = state.opts.jssClassPrefix;
+      }
+
+      if (state.opts.disableClass === true) {
+        disableClass = true;
       }
 
       fileNameAttr = `${dataPrefix}-file`;
@@ -40,26 +45,29 @@ export default function ({ types: t }) {
         baseClass.push(nameNode.name);
       }
 
-      const classNode = attributes.find(attr =>
-        attr.name && attr.name.name === classPrefix
-      );
 
-      if (classNode) {
-        const classExpr = classNode.value.expression;
+      if (!disableClass) {
+        const classNode = attributes.find(attr =>
+          attr.name && attr.name.name === classPrefix
+        );
 
-        if (classExpr) {
-          let attrValue;
+        if (classNode) {
+          const classExpr = classNode.value.expression;
 
-          if (classExpr.object && classExpr.object.name === jssClassPrefix) {
-            attrValue = classExpr.property.name || classExpr.property.value;
+          if (classExpr) {
+            let attrValue;
 
-          } else if (classExpr.arguments) {
-            const values = classExpr.arguments.map(_transpile);
-            attrValue = values.join('-');
-          }
+            if (classExpr.object && classExpr.object.name === jssClassPrefix) {
+              attrValue = classExpr.property.name || classExpr.property.value;
 
-          if (attrValue) {
-            baseClass.push(attrValue);
+            } else if (classExpr.arguments) {
+              const values = classExpr.arguments.map(_transpile);
+              attrValue = values.join('-');
+            }
+
+            if (attrValue) {
+              baseClass.push(attrValue);
+            }
           }
         }
       }
