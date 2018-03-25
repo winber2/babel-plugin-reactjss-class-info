@@ -25,7 +25,20 @@ export default function ({ types: t }) {
     },
     JSXOpeningElement(path, state) {
       const attributes = path.node.attributes;
-      const newAttributes = [];
+      const nameNode = path.node.name;
+      const baseClass = [];
+
+      if (
+        state.file
+        && state.file.opts
+        && state.file.opts.basename
+      ) {
+        baseClass.push(state.file.opts.basename);
+      }
+
+      if (t.isJSXIdentifier(nameNode)) {
+        baseClass.push(nameNode.name);
+      }
 
       const classNode = attributes.find(attr =>
         attr.name && attr.name.name === classPrefix
@@ -35,35 +48,28 @@ export default function ({ types: t }) {
         const classExpr = classNode.value.expression;
 
         if (classExpr) {
-          let attrValue = '';
+          let attrValue;
 
           if (classExpr.object && classExpr.object.name === jssClassPrefix) {
             attrValue = classExpr.property.name || classExpr.property.value;
 
           } else if (classExpr.arguments) {
             const values = classExpr.arguments.map(_transpile);
-            attrValue = values.join(' ');
+            attrValue = values.join('-');
           }
 
-          newAttributes.push(t.jSXAttribute(
-            t.jSXIdentifier(nodeNameAttr),
-            t.stringLiteral(attrValue)
-          ));
+          if (attrValue) {
+            baseClass.push(attrValue);
+          }
         }
       }
 
-      if (
-        state.file
-        && state.file.opts
-        && state.file.opts.basename
-      ) {
-        newAttributes.push(t.jSXAttribute(
-          t.jSXIdentifier(fileNameAttr),
-          t.stringLiteral(state.file.opts.basename)
-        ));
-      }
+      const newAttributes = t.jSXAttribute(
+        t.jSXIdentifier(nodeNameAttr),
+        t.stringLiteral(baseClass.join('_'))
+      );
 
-      attributes.push(...newAttributes);
+      attributes.push(newAttributes);
     },
   };
 
@@ -96,7 +102,7 @@ export default function ({ types: t }) {
       }
     });
 
-    return values.join(' ');
+    return values.join('-');
   }
 
   function _transpileArray(arr) {
@@ -111,6 +117,6 @@ export default function ({ types: t }) {
       }
     });
 
-    return values.join(' ');
+    return values.join('-');
   }
 }
