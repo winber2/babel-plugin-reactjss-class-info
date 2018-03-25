@@ -27,7 +27,9 @@ export default function ({ types: t }) {
       const attributes = path.node.attributes;
       const newAttributes = [];
 
-      const classNode = attributes.find(attr => attr.name.name === classPrefix);
+      const classNode = attributes.find(attr =>
+        attr.name && attr.name.name === classPrefix
+      );
 
       if (classNode) {
         const classExpr = classNode.value.expression;
@@ -36,7 +38,7 @@ export default function ({ types: t }) {
           let attrValue = '';
 
           if (classExpr.object && classExpr.object.name === jssClassPrefix) {
-            attrValue = classExpr.property.name;
+            attrValue = classExpr.property.name || classExpr.property.value;
 
           } else if (classExpr.arguments) {
             const values = classExpr.arguments.map(_transpile);
@@ -75,7 +77,7 @@ export default function ({ types: t }) {
       t.isMemberExpression(data) &&
       data.object.name === jssClassPrefix
     ) {
-      return data.property.name;
+      return data.property.name || data.property.value;
 
     } else if (t.isArrayExpression(data)) {
       return _transpileArray(data);
@@ -88,7 +90,7 @@ export default function ({ types: t }) {
         t.isMemberExpression(prop.key) &&
         prop.key.object.name === jssClassPrefix
       ) {
-        return prop.key.property.name;
+        return prop.key.property.name || prop.key.property.value;
       } else {
         return prop.key.name;
       }
@@ -103,7 +105,7 @@ export default function ({ types: t }) {
         t.isMemberExpression(el) &&
         el.object.name === jssClassPrefix
       ) {
-        return el.property.name
+        return el.property.name || el.property.value;
       } else {
         return el.value;
       }
