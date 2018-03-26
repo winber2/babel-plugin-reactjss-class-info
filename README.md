@@ -2,9 +2,9 @@
 
 
 
-# babel-reactjss-class-info
+# babel-plugin-reactjss-class-info
 
-This is specific solution to a problem for integrating Selenium tests with reactjss. I do not plan adding features for other developers for the time being, but feel free to use this if it benefits you.
+This is experimental specific solution to a problem for integrating Selenium tests with reactjss. I do not plan adding features unless there is a personal need, but feel free to use this if it benefits you.
 
 ## Install
 
